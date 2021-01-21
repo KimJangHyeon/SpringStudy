@@ -4,11 +4,11 @@
 
 ### IN JAVA
 
-![image-20210121113053980](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121113053980.png)
+![image-20210121113053980](..\img\image-20210121113053980.png)
 
-![image-20210121113113911](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121113113911.png)
+![image-20210121113113911](..\img\image-20210121113113911.png)
 
-![image-20210121113143957](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121113143957.png)
+![image-20210121113143957](..\img\image-20210121113143957.png)
 
 - 한글 입력 받기 위해서 2byte필요!
 
@@ -26,9 +26,9 @@
 \- 직렬화 작업으로 인해 분리된 객체를 원래대로 만드는 것을 **역직렬화(unmarshalling)**라고 한다.
 \- 직렬화된 객체에서 특정 자원을 JVM 밖으로 내보내는 것을 막으려면 **직렬화방지키워드 transient**를 사용하면 된다.
 
-![image-20210121114036046](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121114036046.png)
+![image-20210121114036046](..\img\image-20210121114036046.png)
 
-![image-20210121114050297](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121114050297.png)
+![image-20210121114050297](..\img\image-20210121114050297.png)
 
 
 
@@ -83,7 +83,7 @@
 
 ### HDD 구조
 
-![image-20210121092413772](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121092413772.png)
+![image-20210121092413772](..\img\image-20210121092413772.png)
 
 ​	Platter가 움직이면서 디스크의 내용을 읽는다. 즉 이 움직임이 최소한으로 줄어드는 것이 이상적이다.
 
@@ -91,12 +91,12 @@
 
 * IO작업이 쌓이는 일이 발생할 경우(즉  IO작업이 무진장 들어오는 경우) 여러개의 요청을 하나로 합치는 작업이 필요하다.
 
-  ![image-20210121092821985](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121092821985.png)
-  ![image-20210121092937803](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121092937803.png)
+  ![image-20210121092821985](..\img\image-20210121092821985.png)
+  ![image-20210121092937803](..\img\image-20210121092937803.png)
 
   ​		총 17번 움직인다.
 
-  ![image-20210121093020230](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121093020230.png)
+  ![image-20210121093020230](..\img\image-20210121093020230.png)
 
   ​		총 9번 움직인다.
 
@@ -106,7 +106,7 @@
 
 ### cfg IO 스케줄러 (Completely Fair Queueing)
 
-![image-20210121094401442](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121094401442.png)
+![image-20210121094401442](..\img\image-20210121094401442.png)
 
 * IO의 특성에 따라 RT(Real Time), BE(Best Effort), IDLE 중 하나로 IO 요청을 정의한다. 
 
@@ -166,32 +166,32 @@
 
 
         만약 low_latency가 켜져 있으면 그룹의 큐를 확인하지 않게 되고, 큐에 I/O요청이 많을 수록 한번의 time slice로는 처리가 어렵다. 이렇게 소요시간이 많이 걸리는 요청들은 자신의 time slice를 다 쓰고 다시 차례가 돌아오기를 기다려야하기 때문에 처리하는데 많은 시간이 소요된다. low_laency 설정 값을 통해서 전체적인 I/O 요청을 바탕으로 time slice를 조절한다. 아마 성능에 가장 큰 영향을 끼치는 요소가 될 것이다.
-
+    
     * slice_idle
-
+    
       * 보통의 IO요청은 random access, sequential access가 많다. 그렇기에 queue가 끝나고 잠시 기다리는 시간.
-
+    
     * slice_sync
-
+    
       * sync에 대한 time slice의 기준. queue에 작업이 하나라도 있으면 이 값만큼 실행한다. 
-
+    
     * slice_async
-
+    
       * async에 대한 time slice의 기준
-
+    
     * slice_async_rq
-
+    
       * 큐의 값을 한번에 꺼내어 dispatch queue에 넘기는 최대 요청수(async)
-
+    
     * quantum
-
+    
       * sync 요청을 꺼내서 dispatch에 넘기는 최대 요청수.
-
+    
         이값이 커진다면 큐에서 한번에 꺼낼 수 있는 요청의 개수가 증가하겠지만 그만큼의 하나의 큐가 실행될 때 걸리는 시간이 늘어나기 때문에 경우에 따라서는 성능이 저하될 수 있다.
 
 ### deadline IO 스케줄러
 
-![image-20210121110323750](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121110323750.png)
+![image-20210121110323750](..\img\image-20210121110323750.png)
 
  I/O요청 별로 완료되어야하는 deadline을 가지고 있는 I/O 스케줄러이다.  가능한 한 해당 deadline을 넘기지 않도록 동작한다.
 
@@ -230,7 +230,7 @@ fifo_bacth   frount_merges   read_expire   write_expire    writes_starved
 
 ## Network IO
 
-![image-20210121120932470](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121120932470.png)
+![image-20210121120932470](..\img\image-20210121120932470.png)
 
 **packet:** 보낼 데이터를 잘라서 보내는 단위.
 
@@ -269,7 +269,7 @@ fifo_bacth   frount_merges   read_expire   write_expire    writes_starved
 
 #### 종류
 
-![image-20210121114230645](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121114230645.png)
+![image-20210121114230645](..\img\image-20210121114230645.png)
 
 * 통신을 통해 컴퓨터와 컴퓨터를 연결하는 것  
 
@@ -353,7 +353,7 @@ fifo_bacth   frount_merges   read_expire   write_expire    writes_starved
 
 ##### 3 way handshaking
 
-![image-20210121114636460](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121114636460.png)
+![image-20210121114636460](..\img\image-20210121114636460.png)
 
 **#1**
 
@@ -373,7 +373,7 @@ A클라이언트는 B서버에게 ACK을 보내고 이후로부터는 연결이 
 
 
 
-![image-20210121114920194](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121114920194.png)
+![image-20210121114920194](..\img\image-20210121114920194.png)
 
 **#1**
 
@@ -399,7 +399,7 @@ FIN을 받고 routing delay 패킷 유실로 인한 재전송이 FIN보다 늦�
 
 ### JAVA 기준 NETWORK
 
-![image-20210121121416093](C:\Users\rlawk\AppData\Roaming\Typora\typora-user-images\image-20210121121416093.png)
+![image-20210121121416093](..\img\image-20210121121416093.png)
 
 
 
