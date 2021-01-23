@@ -104,39 +104,52 @@
 
   * SSD는 컨트롤러를 통해 전기적 신호를 저장하기 때문
 
+![image-20210123112749456](..\img\image-20210123112749456.png)
+
 ### cfg IO 스케줄러 (Completely Fair Queueing)
 
 ![image-20210121094401442](..\img\image-20210121094401442.png)
 
 * IO의 특성에 따라 RT(Real Time), BE(Best Effort), IDLE 중 하나로 IO 요청을 정의한다. 
 
-  ionice를 통해 변경이 가능하다. 대부분의 요청은 BE에 속한다. BE -> RT -> IDLE 순으로 처리한다. 
+  ionice를 통해 변경이 가능하다. 대부분의 요청은 BE에 속한다. RT -> BE  -> IDLE 순으로 처리한다. 
 
   셋을 분류한 뒤에 service tree라는 워크로드별 그룹으로 다시 나눈다.
 
-  그후 해당 노드에 A프로세스에서 발생시킨 요청은 cfq queue(A)에, B프로세스에서 발생시킨 요청은 cfq queue(B)에 저장한다.  
+  그후 해당 노드에 A프로세스에서 발생시킨 요청은 cfq queue(A)에, B프로세스에서 발생시킨 요청은 cfq queue(B)에 저장한다. 
 
-  * **SYNC(주로 read)**
+  ```
+기본적으로 0 ~ 7 순위까지의 우선순위 실행이 존재한다. 하지만 syscall()을 직접호출하지 않고서는 섬세한 작업 불가. cgroup 시스템의 blkio 서브 시스템을 이용하면 우선순위 변경 가능
+  기본적으로는 BE로 들어간다. C언어로 조작가능한 범위는 우선으로 읽기(O_DIRECT), 동기 쓰기(O_SYNC)까지만 가능
+```
+  
 
-     순차적인 동기화 IO 작업, 주로 순차적 read -> 순차적으로 읽기 때문에 디스크 헤드와 가까운 위치의 작업이 들어올 확률이 높기 때문
-
-    그래서 대기시간이 있떠라도 가까운 곳의 IO요청을 처리하게 되면 더 좋은 성능을 내는데 도움이 되기 때문에 임시 대기하게 된다. (slice_idle의 값으로 대기 시간 설정 가능)
-
-  * **SYNC_NOIDLE**
-
+  
+* **SYNC(주로 read)**
+  
+  바로 디스크에 작업을 하길 원하는 경우 완료가 될 때까지 기다림
+  
+  순차적인 동기화 IO 작업, 주로 순차적 read -> 순차적으로 읽기 때문에 디스크 헤드와 가까운 위치의 작업이 들어올 확률이 높기 때문
+  
+  그래서 대기시간이 있떠라도 가까운 곳의 IO요청을 처리하게 되면 더 좋은 성능을 내는데 도움이 되기 때문에 임시 대기하게 된다. (slice_idle의 값으로 대기 시간 설정 가능)
+  
+* **SYNC_NOIDLE**
+  
     여기에 속한 queue는 임의 작업은 디스크 헤드를 많이 움직이게 하기 때문에 굳이 다음 요청을 기다려서 얻게 되는 성능상의 이점이 없다. 그렇기 때문에 큐에 대한 처리를 완료한 후 대기시간 없이 바로 다음 큐에 대한 IO작업을 실행
-
+  
   * **ASYNC(주로 write)**
+
+    연산이 수행되지 않아도 그냥 넘어감(file descriptor를 설정할 때 기본옵션)
 
     비동기화 IO작업은 ASYNC트리에 모아 두고 한번에 처리
 
   * **스케줄러의 파라미터**
 
     ```
-    back_seek_max   fifo_expire_async   group_idle   low_latency  slice_async  slice_idle
+  back_seek_max   fifo_expire_async   group_idle   low_latency  slice_async  slice_idle
     back_seek_penalty  fifo_expire_sync  group_isolation  quantum   slice_async_rq  slice_sync
-    ```
-
+  ```
+  
     * back_seek_max
 
       * queue의 작업을 끝내고 기다리는 시간 동안 헤더에서 이동할 거리가 바로 다음 작업으로 생각되는 max값
@@ -148,20 +161,20 @@
     * fifo_expire_async
 
       * async요청의 만료 시간. 대부분 flush는 OS가 관리하기 때문에 이 flush를 날리고 성공여부를 기다리는 시간이다.
-      * sync 요청의 만료 시간. 
-
-    * group
-
+    * sync 요청의 만료 시간. 
+  
+  * group
+  
       * cgroup에서 같은 그룹으로 묶은 것을 큐를 이동할때 기다리는 시간없이 바로 이동.
-
+  
     * group_isolation (SYNC_NOIDLE 상황)
-
+  
       * 값이 0이면 cgroup의 루트로 접근되기에 헤더를 더 많이 움직여야되기에 IO요청 완료까지 시간이 오래걸림. 값이 1이면 cgroup 값에 영향을 받아 cgroup 분류가 명확해짐 -> cgroup을 활용하는 환경에서 큰 영향을 주는 값 
-
+  
     * low_latency
-
+  
       * I/O 요청을 처리하다가 발생할 수 있는 대기 시간을 줄이는 역할을 한다. 이 값은 boolean으로 0이나 1, 즉 disable/enable을 의미한다. cfq는 현재 프로세스별로 별도의 큐를 할당하고 이 큐들은 그 성격에 따라 RT(Real Time), BE(Best Effect), IDLE 이렇게 세개의 큐로 다시 그룹화된다. 만약 I/O를 일으키는 5개의 프로세스가 있다고 가정했을 때 아무 설정을 하지 않으면 이 5개의 프로세스는 각각 sorted, fifo 2개씩 큐를 할당 받고 이 큐들은 BE 그룹으로 묶인다. 이때 low_latency가 설정되어 있다면 각 큐에 time_slice를 할당하기 전에 각 그룹별로 요청이 몇개씩 있는지 확인한다. 각 그룹별로 있는 큐의 요청들을 전부 합친 후에 time_slice를 곱하게 되는데 이때 expect_latency값이 생성된다. 즉 해당 그룹의 큐를 모두 처리하는데 걸릴 시간을 계산하고 이 계산 결과가 target_latency 값보다 크다면 이 값을 넘지 않도록 조절한다.
-
+  
         **과거에는 target_latency도 설정이 가능한 매개변수였는데 최근에는 300ms로 소스 코드상에 하드 코딩된다.**
 
 
@@ -403,9 +416,13 @@ FIN을 받고 routing delay 패킷 유실로 인한 재전송이 FIN보다 늦�
 
 
 
+DISK IO -> AYNC, SYNC라고 부르는 이유
 
+**받은 질문**
 
-
+1. DISK IO의 SYNC, ASYNC
+2. 커널의 스케줄러인지
+3. RE, BE, Idle
 
 **참조**
 
