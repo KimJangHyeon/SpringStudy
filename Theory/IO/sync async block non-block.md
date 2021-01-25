@@ -1,3 +1,8 @@
+---
+typora-copy-images-to: ..\img
+typora-root-url: ./
+---
+
 
 typora-copy-images-to: ..\img
 
@@ -35,7 +40,9 @@ typora-copy-images-to: ..\img
 
 ## 사용
 
-![image-20210125112408888](C:\Users\rlawk\Desktop\SpringStudy\Theory\img\image-20210125112408888.png)
+![image-20210125112408888](/../img/image-20210125113022194.png)
+
+
 
 
 
